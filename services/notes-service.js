@@ -99,20 +99,24 @@ class NotesService {
             throw new Error('Note data must be an object');
         }
 
-        if (!noteData.title || typeof noteData.title !== 'string' || noteData.title.trim().length === 0) {
-            throw new Error('Title is required and must be a non-empty string');
+        // Trim the values before validation
+        const title = String(noteData.title || '').trim();
+        const content = String(noteData.content || '').trim();
+
+        if (!title) {
+            throw new Error('Title is required');
         }
 
-        if (!noteData.content || typeof noteData.content !== 'string' || noteData.content.trim().length === 0) {
-            throw new Error('Content is required and must be a non-empty string');
+        if (!content) {
+            throw new Error('Content is required');
         }
 
-        if (noteData.title.trim().length > 100) {
-            throw new Error('Title must be less than 100 characters');
+        if (title.length > 100) {
+            throw new Error(`Title must be less than 100 characters (current: ${title.length})`);
         }
 
-        if (noteData.content.trim().length > 1000) {
-            throw new Error('Content must be less than 1000 characters');
+        if (content.length >= 1000) {
+            throw new Error(`Content must be less than 1000 characters (current: ${content.length})`);
         }
 
         if (noteData.tags !== undefined) {

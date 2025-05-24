@@ -22,6 +22,9 @@ noteForm.addEventListener('submit', handleNoteSubmit);
 tagFilter.addEventListener('change', handleTagFilter);
 clearFilterBtn.addEventListener('click', clearTagFilter);
 
+// Add content length validation
+noteContentInput.addEventListener('input', handleContentInput);
+
 // Initialize app
 loadNotes();
 loadTags();
@@ -70,6 +73,33 @@ async function loadTags() {
     }
 }
 
+// Content length validation
+function handleContentInput(e) {
+    const content = e.target.value.trim();
+    const maxLength = 1000;
+    const remainingChars = maxLength - content.length;
+    
+    // Get or create character counter
+    let charCounter = document.getElementById('charCounter');
+    if (!charCounter) {
+        charCounter = document.createElement('div');
+        charCounter.id = 'charCounter';
+        charCounter.className = 'text-sm mt-1';
+        e.target.parentNode.appendChild(charCounter);
+    }
+    
+    // Update counter and styling
+    charCounter.textContent = `${remainingChars} characters remaining`;
+    charCounter.className = `text-sm mt-1 ${remainingChars < 0 ? 'text-red-600' : 'text-gray-500'}`;
+    
+    // Update submit button state
+    const submitBtn = noteForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = remainingChars < 0;
+    submitBtn.className = `w-full ${remainingChars < 0 
+        ? 'bg-gray-400 cursor-not-allowed' 
+        : 'bg-blue-500 hover:bg-blue-600'} text-white px-4 py-2 rounded-md transition-colors`;
+}
+
 // Handle form submission
 async function handleNoteSubmit(e) {
     e.preventDefault();
@@ -78,8 +108,21 @@ async function handleNoteSubmit(e) {
     const content = noteContentInput.value.trim();
     const tags = noteTagsInput.value.trim();
     
-    if (!title || !content) {
-        showError('Title and content are required');
+    if (!title) {
+        showError('Title is required');
+        noteTitleInput.focus();
+        return;
+    }
+
+    if (!content) {
+        showError('Content is required');
+        noteContentInput.focus();
+        return;
+    }
+
+    if (content.length >= 1000) {
+        showError(`Content must be less than 1000 characters (current: ${content.length})`);
+        noteContentInput.focus();
         return;
     }
 
