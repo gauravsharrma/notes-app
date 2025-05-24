@@ -8,6 +8,12 @@ const storageService = require('./services/storage-service');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Check required environment variables
+if (!process.env.DATABASE_URL) {
+    console.error('DATABASE_URL environment variable is required');
+    process.exit(1);
+}
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -28,16 +34,9 @@ app.use((err, req, res, next) => {
 // Initialize database and start server
 async function startServer() {
     try {
-        // Ensure data directory exists
-        const fs = require('fs');
-        const dataDir = path.join(__dirname, 'data');
-        if (!fs.existsSync(dataDir)) {
-            fs.mkdirSync(dataDir);
-        }
-
         // Connect to database
         await storageService.connect();
-        console.log('Connected to database successfully');
+        console.log('Connected to PostgreSQL database successfully');
 
         // Start server
         app.listen(PORT, () => {

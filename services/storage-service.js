@@ -1,34 +1,30 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const { Pool } = require('pg');
 
 class StorageService {
     constructor() {
-        this.db = null;
+        this.pool = new Pool({
+            connectionString: process.env.DATABASE_URL,
+            ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+        });
     }
 
     async connect() {
-        return new Promise((resolve, reject) => {
-            const dbPath = process.env.DB_PATH || path.join(__dirname, '../data/notes.db');
-            this.db = new sqlite3.Database(dbPath, (err) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                this.initializeDatabase()
-                    .then(resolve)
-                    .catch(reject);
-            });
-        });
+        try {
+            await this.initializeDatabase();
+            return Promise.resolve();
+        } catch (error) {
+            return Promise.reject(error);
+        }
     }
 
     async initializeDatabase() {
         const sql = `
             CREATE TABLE IF NOT EXISTS notes (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 title TEXT NOT NULL,
                 content TEXT NOT NULL,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             )
         `;
         return this.run(sql);
@@ -36,71 +32,54 @@ class StorageService {
 
     async getAllNotes() {
         const sql = 'SELECT * FROM notes ORDER BY updated_at DESC';
-        return this.all(sql);
+        const result = await this.pool.query(sql);
+        return result.rows;
     }
 
     async getNoteById(id) {
-        const sql = 'SELECT * FROM notes WHERE id = ?';
-        return this.get(sql, [id]);
+        const sql = 'SELECT * FROM notes WHERE id = $1';
+        const result = await this.pool.query(sql, [id]);
+        return result.rows[0];
     }
 
     async createNote(title, content) {
         const sql = `
             INSERT INTO notes (title, content)
-            VALUES (?, ?)
+            VALUES ($1, $2)
+            RETURNING id
         `;
-        return this.run(sql, [title, content]);
+        const result = await this.pool.query(sql, [title, content]);
+        return { id: result.rows[0].id };
     }
 
     async updateNote(id, title, content) {
         const sql = `
             UPDATE notes 
-            SET title = ?, content = ?, updated_at = CURRENT_TIMESTAMP
-            WHERE id = ?
+            SET title = $1, content = $2, updated_at = CURRENT_TIMESTAMP
+            WHERE id = $3
+            RETURNING id
         `;
-        return this.run(sql, [title, content, id]);
+        const result = await this.pool.query(sql, [title, content, id]);
+        return { id: result.rows[0]?.id, changes: result.rowCount };
     }
 
     async deleteNote(id) {
-        const sql = 'DELETE FROM notes WHERE id = ?';
-        return this.run(sql, [id]);
+        const sql = 'DELETE FROM notes WHERE id = $1';
+        const result = await this.pool.query(sql, [id]);
+        return { changes: result.rowCount };
     }
 
-    // Helper methods for database operations
+    // Helper method for running queries
     async run(sql, params = []) {
-        return new Promise((resolve, reject) => {
-            this.db.run(sql, params, function(err) {
-                if (err) reject(err);
-                else resolve({ id: this.lastID, changes: this.changes });
-            });
-        });
-    }
-
-    async get(sql, params = []) {
-        return new Promise((resolve, reject) => {
-            this.db.get(sql, params, (err, row) => {
-                if (err) reject(err);
-                else resolve(row);
-            });
-        });
-    }
-
-    async all(sql, params = []) {
-        return new Promise((resolve, reject) => {
-            this.db.all(sql, params, (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows);
-            });
-        });
+        const result = await this.pool.query(sql, params);
+        return { 
+            id: result.rows[0]?.id,
+            changes: result.rowCount
+        };
     }
 
     async close() {
-        return new Promise((resolve, reject) => {
-            this.db.close((err) => {
-                if (err) reject(err);
-                else resolve();
-            });
-        });
+        return this.pool.end();
     }
 }
 
