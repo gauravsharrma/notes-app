@@ -279,27 +279,14 @@ function renderNotes() {
         createdAt.textContent = `Created: ${formatDate(note.created_at)}`;
         updatedAt.textContent = `Updated: ${formatDate(note.updated_at)}`;
         
-        // Update buttons container
-        const buttonsContainer = noteCard.querySelector('.buttons-container');
-        
-        // View button
-        const viewBtn = document.createElement('button');
-        viewBtn.className = 'view-btn text-blue-500 hover:text-blue-700';
-        viewBtn.textContent = 'View';
-        viewBtn.onclick = () => window.open(`/view.html?id=${note.id}`, '_blank');
-        
-        // Edit button
+        // Set up button handlers
+        const viewBtn = noteCard.querySelector('.view-btn');
         const editBtn = noteCard.querySelector('.edit-btn');
-        editBtn.onclick = () => editNote(note);
-        
-        // Delete button
         const deleteBtn = noteCard.querySelector('.delete-btn');
-        deleteBtn.onclick = () => deleteNote(note.id);
         
-        // Add buttons in order
-        buttonsContainer.appendChild(viewBtn);
-        buttonsContainer.appendChild(editBtn);
-        buttonsContainer.appendChild(deleteBtn);
+        if (viewBtn) viewBtn.addEventListener('click', () => window.open(`/view.html?id=${note.id}`, '_blank'));
+        if (editBtn) editBtn.addEventListener('click', () => editNote(note));
+        if (deleteBtn) deleteBtn.addEventListener('click', () => deleteNote(note.id));
         
         notesList.appendChild(noteElement);
     });
