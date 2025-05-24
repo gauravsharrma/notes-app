@@ -99,16 +99,17 @@ function renderNotes() {
         <div class="note-card bg-white p-4 rounded-lg shadow-md">
             <h3 class="text-xl font-semibold mb-2">${escapeHtml(note.title)}</h3>
             <p class="text-gray-600 mb-4">${escapeHtml(note.content)}</p>
-            <div class="flex justify-end space-x-2">
-                <button onclick="editNote(${JSON.stringify(note)})"
-                        class="text-blue-500 hover:text-blue-700">
-                    Edit
-                </button>
-                <button onclick="deleteNote(${note.id})"
-                        class="delete-btn text-red-500 hover:text-red-700">
-                    Delete
-                </button>
-            </div>
+            <div class="flex justify-end space-x-4">
+    <button onclick="editNote(${JSON.stringify(note)})"
+            class="text-blue-500 hover:text-blue-700 font-medium">
+        Edit
+    </button>
+    <button onclick="deleteNote(${note.id})"
+            class="text-red-500 hover:text-red-700 font-medium">
+        Delete
+    </button>
+</div>
+
         </div>
     `).join('');
 }
