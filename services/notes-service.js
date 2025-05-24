@@ -40,11 +40,25 @@ class NotesService {
     async createNote(noteData) {
         try {
             this.validateNoteData(noteData);
-            const { title, content, tags } = noteData;
-            const processedTags = this.processTags(tags);
-            return await storageService.createNote(title, content, processedTags);
+            
+            // Ensure title and content are strings and properly trimmed
+            const title = String(noteData.title).trim();
+            const content = String(noteData.content).trim();
+            
+            // Process tags, ensuring it's an array of strings
+            const processedTags = this.processTags(noteData.tags || []);
+            
+            // Create the note
+            const result = await storageService.createNote(title, content, processedTags);
+            
+            if (!result || !result.id) {
+                throw new Error('Failed to create note - no ID returned');
+            }
+            
+            return result;
         } catch (error) {
-            throw new Error('Failed to create note: ' + error.message);
+            console.error('Error in createNote:', error);
+            throw new Error(`Failed to create note: ${error.message}`);
         }
     }
 
@@ -81,26 +95,30 @@ class NotesService {
     }
 
     validateNoteData(noteData) {
-        const { title, content, tags } = noteData;
+        if (!noteData || typeof noteData !== 'object') {
+            throw new Error('Note data must be an object');
+        }
 
-        if (!title || typeof title !== 'string' || title.trim().length === 0) {
+        if (!noteData.title || typeof noteData.title !== 'string' || noteData.title.trim().length === 0) {
             throw new Error('Title is required and must be a non-empty string');
         }
 
-        if (!content || typeof content !== 'string' || content.trim().length === 0) {
+        if (!noteData.content || typeof noteData.content !== 'string' || noteData.content.trim().length === 0) {
             throw new Error('Content is required and must be a non-empty string');
         }
 
-        if (title.length > 100) {
+        if (noteData.title.trim().length > 100) {
             throw new Error('Title must be less than 100 characters');
         }
 
-        if (content.length > 1000) {
+        if (noteData.content.trim().length > 1000) {
             throw new Error('Content must be less than 1000 characters');
         }
 
-        if (tags !== undefined && !Array.isArray(tags) && typeof tags !== 'string') {
-            throw new Error('Tags must be an array or a comma-separated string');
+        if (noteData.tags !== undefined) {
+            if (!Array.isArray(noteData.tags) && typeof noteData.tags !== 'string') {
+                throw new Error('Tags must be an array or a comma-separated string');
+            }
         }
     }
 

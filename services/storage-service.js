@@ -57,17 +57,27 @@ class StorageService {
     }
 
     async createNote(title, content, tags = []) {
-        const sql = `
-            INSERT INTO notes (title, content, tags)
-            VALUES ($1, $2, $3)
-            RETURNING id, created_at, updated_at
-        `;
-        const result = await this.pool.query(sql, [title, content, tags]);
-        return {
-            id: result.rows[0].id,
-            created_at: result.rows[0].created_at,
-            updated_at: result.rows[0].updated_at
-        };
+        try {
+            const sql = `
+                INSERT INTO notes (title, content, tags)
+                VALUES ($1, $2, $3)
+                RETURNING id, title, content, tags, created_at, updated_at
+            `;
+            
+            // Ensure tags is an array
+            const processedTags = Array.isArray(tags) ? tags : [];
+            
+            const result = await this.pool.query(sql, [title, content, processedTags]);
+            
+            if (!result.rows || result.rows.length === 0) {
+                throw new Error('No data returned after creating note');
+            }
+            
+            return result.rows[0];
+        } catch (error) {
+            console.error('Database error in createNote:', error);
+            throw new Error(`Database error: ${error.message}`);
+        }
     }
 
     async updateNote(id, title, content, tags = []) {
@@ -98,11 +108,16 @@ class StorageService {
     }
 
     async run(sql, params = []) {
-        const result = await this.pool.query(sql, params);
-        return { 
-            id: result.rows[0]?.id,
-            changes: result.rowCount
-        };
+        try {
+            const result = await this.pool.query(sql, params);
+            return { 
+                id: result.rows[0]?.id,
+                changes: result.rowCount
+            };
+        } catch (error) {
+            console.error('Database error in run:', error);
+            throw new Error(`Database error: ${error.message}`);
+        }
     }
 
     async close() {

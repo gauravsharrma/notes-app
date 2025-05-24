@@ -97,12 +97,23 @@ async function handleNoteSubmit(e) {
             body: JSON.stringify({ title, content, tags })
         });
 
-        if (!response.ok) throw new Error('Failed to save note');
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Failed to save note (${response.status})`);
+        }
+
+        const result = await response.json();
+        
+        if (!result || !result.id) {
+            throw new Error('Invalid response from server');
+        }
 
         await Promise.all([loadNotes(), loadTags()]);
         resetForm();
+        showSuccess('Note saved successfully!');
     } catch (error) {
-        showError('Failed to save note');
+        console.error('Error saving note:', error);
+        showError(error.message || 'Failed to save note');
     }
 }
 
@@ -278,6 +289,18 @@ function showError(message) {
             errorDiv.remove();
         }
     }, 5000);
+}
+
+function showSuccess(message) {
+    const successDiv = document.createElement('div');
+    successDiv.className = 'success-message bg-green-100 text-green-700 p-4 rounded mb-4';
+    successDiv.textContent = message;
+    noteForm.insertAdjacentElement('beforebegin', successDiv);
+    setTimeout(() => {
+        if (successDiv.parentNode) {
+            successDiv.remove();
+        }
+    }, 3000);
 }
 
 function escapeHtml(unsafe) {
