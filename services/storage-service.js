@@ -116,9 +116,19 @@ class StorageService {
     async run(sql, params = []) {
         try {
             const result = await this.pool.query(sql, params);
-            return { 
+            // For DDL statements or statements that don't return rows
+            if (!result.rows || result.rows.length === 0) {
+                return {
+                    success: true,
+                    changes: result.rowCount || 0
+                };
+            }
+            // For DML statements that return rows
+            return {
+                success: true,
                 id: result.rows[0]?.id,
-                changes: result.rowCount
+                changes: result.rowCount,
+                rows: result.rows
             };
         } catch (error) {
             console.error('Database error in run:', error);
