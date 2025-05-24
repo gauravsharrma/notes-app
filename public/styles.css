@@ -1,0 +1,36 @@
+.note-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.note-card:hover {
+    transform: translateY(-2px);
+}
+
+.delete-btn {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.note-card:hover .delete-btn {
+    opacity: 1;
+}
+
+.loading {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.error-message {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+} 
