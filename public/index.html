@@ -60,26 +60,26 @@
 
     <!-- Note Template -->
     <template id="noteTemplate">
-        <div class="note-card bg-white p-4 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold mb-2"></h3>
-            <p class="text-gray-600 mb-4"></p>
-            <div class="mb-3 space-x-1 tags-container">
+        <div class="note-card bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold mb-3 text-gray-800"></h3>
+            <p class="text-gray-600 mb-4 whitespace-pre-line"></p>
+            <div class="mb-3 space-x-1 tags-container flex flex-wrap gap-1">
                 <!-- Tags will be inserted here -->
             </div>
             <div class="text-sm text-gray-500 mb-4">
                 <p class="created-at"></p>
                 <p class="updated-at"></p>
             </div>
-            <div class="flex justify-end space-x-2">
-                <button class="edit-btn text-blue-500 hover:text-blue-700">
-                    Edit
-                </button>
-                <button class="delete-btn text-red-500 hover:text-red-700">
-                    Delete
-                </button>
+            <div class="buttons-container flex justify-end space-x-4">
+                <!-- Buttons will be inserted here -->
             </div>
         </div>
     </template>
+
+    <!-- Add support for markdown preview -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.8.0/build/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.8.0/build/styles/github.min.css">
 
     <script src="app.js"></script>
 </body>

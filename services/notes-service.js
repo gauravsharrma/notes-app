@@ -111,12 +111,8 @@ class NotesService {
             throw new Error('Content is required');
         }
 
-        if (title.length > 100) {
-            throw new Error(`Title must be less than 100 characters (current: ${title.length})`);
-        }
-
-        if (content.length >= 1000) {
-            throw new Error(`Content must be less than 1000 characters (current: ${content.length})`);
+        if (title.length > 200) {
+            throw new Error(`Title must be less than 200 characters (current: ${title.length})`);
         }
 
         if (noteData.tags !== undefined) {

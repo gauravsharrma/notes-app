@@ -76,28 +76,17 @@ async function loadTags() {
 // Content length validation
 function handleContentInput(e) {
     const content = e.target.value.trim();
-    const maxLength = 1000;
-    const remainingChars = maxLength - content.length;
-    
-    // Get or create character counter
-    let charCounter = document.getElementById('charCounter');
-    if (!charCounter) {
-        charCounter = document.createElement('div');
-        charCounter.id = 'charCounter';
-        charCounter.className = 'text-sm mt-1';
-        e.target.parentNode.appendChild(charCounter);
-    }
-    
-    // Update counter and styling
-    charCounter.textContent = `${remainingChars} characters remaining`;
-    charCounter.className = `text-sm mt-1 ${remainingChars < 0 ? 'text-red-600' : 'text-gray-500'}`;
-    
-    // Update submit button state
-    const submitBtn = noteForm.querySelector('button[type="submit"]');
-    submitBtn.disabled = remainingChars < 0;
-    submitBtn.className = `w-full ${remainingChars < 0 
-        ? 'bg-gray-400 cursor-not-allowed' 
-        : 'bg-blue-500 hover:bg-blue-600'} text-white px-4 py-2 rounded-md transition-colors`;
+    const charCounter = document.getElementById('charCounter') || createCharCounter(e.target);
+    charCounter.textContent = `${content.length} characters`;
+    charCounter.className = 'text-sm mt-1 text-gray-500';
+}
+
+function createCharCounter(targetElement) {
+    const charCounter = document.createElement('div');
+    charCounter.id = 'charCounter';
+    charCounter.className = 'text-sm mt-1 text-gray-500';
+    targetElement.parentNode.appendChild(charCounter);
+    return charCounter;
 }
 
 // Handle form submission
@@ -255,7 +244,6 @@ function createTagElement(tag, isButton = false) {
 function renderNotes() {
     notesList.innerHTML = '';
     
-    // Check if notes is null/undefined or empty
     if (!notes || !Array.isArray(notes) || notes.length === 0) {
         const emptyMessage = document.createElement('div');
         emptyMessage.className = 'text-center p-8 text-gray-500';
@@ -268,9 +256,14 @@ function renderNotes() {
         const noteElement = noteTemplate.content.cloneNode(true);
         const noteCard = noteElement.querySelector('.note-card');
         
-        // Set title and content
+        // Set title
         noteCard.querySelector('h3').textContent = note.title || 'Untitled';
-        noteCard.querySelector('p').textContent = note.content || '';
+        
+        // Set preview of content
+        const contentPreview = note.content.length > 200 
+            ? note.content.substring(0, 200) + '...'
+            : note.content;
+        noteCard.querySelector('p').textContent = contentPreview;
         
         // Add tags
         const tagsContainer = noteCard.querySelector('.tags-container');
@@ -286,9 +279,27 @@ function renderNotes() {
         createdAt.textContent = `Created: ${formatDate(note.created_at)}`;
         updatedAt.textContent = `Updated: ${formatDate(note.updated_at)}`;
         
-        // Add event listeners
-        noteCard.querySelector('.edit-btn').onclick = () => editNote(note);
-        noteCard.querySelector('.delete-btn').onclick = () => deleteNote(note.id);
+        // Update buttons container
+        const buttonsContainer = noteCard.querySelector('.buttons-container');
+        
+        // View button
+        const viewBtn = document.createElement('button');
+        viewBtn.className = 'view-btn text-blue-500 hover:text-blue-700';
+        viewBtn.textContent = 'View';
+        viewBtn.onclick = () => window.open(`/view.html?id=${note.id}`, '_blank');
+        
+        // Edit button
+        const editBtn = noteCard.querySelector('.edit-btn');
+        editBtn.onclick = () => editNote(note);
+        
+        // Delete button
+        const deleteBtn = noteCard.querySelector('.delete-btn');
+        deleteBtn.onclick = () => deleteNote(note.id);
+        
+        // Add buttons in order
+        buttonsContainer.appendChild(viewBtn);
+        buttonsContainer.appendChild(editBtn);
+        buttonsContainer.appendChild(deleteBtn);
         
         notesList.appendChild(noteElement);
     });
