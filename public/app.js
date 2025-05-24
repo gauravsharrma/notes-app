@@ -76,9 +76,20 @@ async function loadTags() {
 // Content length validation
 function handleContentInput(e) {
     const content = e.target.value.trim();
+    const maxLength = 20000;
+    const remainingChars = maxLength - content.length;
     const charCounter = document.getElementById('charCounter') || createCharCounter(e.target);
-    charCounter.textContent = `${content.length} characters`;
-    charCounter.className = 'text-sm mt-1 text-gray-500';
+    
+    // Update counter and styling
+    charCounter.textContent = `${content.length.toLocaleString()} / ${maxLength.toLocaleString()} characters`;
+    charCounter.className = `text-sm mt-1 ${remainingChars < 0 ? 'text-red-600' : 'text-gray-500'}`;
+    
+    // Update submit button state
+    const submitBtn = noteForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = remainingChars < 0;
+    submitBtn.className = `w-full ${remainingChars < 0 
+        ? 'bg-gray-400 cursor-not-allowed' 
+        : 'bg-blue-500 hover:bg-blue-600'} text-white px-4 py-2 rounded-md transition-colors`;
 }
 
 function createCharCounter(targetElement) {
@@ -109,8 +120,8 @@ async function handleNoteSubmit(e) {
         return;
     }
 
-    if (content.length >= 1000) {
-        showError(`Content must be less than 1000 characters (current: ${content.length})`);
+    if (content.length > 20000) {
+        showError(`Content must be less than 20,000 characters (current: ${content.length})`);
         noteContentInput.focus();
         return;
     }

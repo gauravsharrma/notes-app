@@ -115,6 +115,10 @@ class NotesService {
             throw new Error(`Title must be less than 200 characters (current: ${title.length})`);
         }
 
+        if (content.length > 20000) {
+            throw new Error(`Content must be less than 20,000 characters (current: ${content.length})`);
+        }
+
         if (noteData.tags !== undefined) {
             if (!Array.isArray(noteData.tags) && typeof noteData.tags !== 'string') {
                 throw new Error('Tags must be an array or a comma-separated string');

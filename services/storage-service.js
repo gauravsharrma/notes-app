@@ -28,12 +28,18 @@ class StorageService {
         const sql = `
             CREATE TABLE IF NOT EXISTS notes (
                 id SERIAL PRIMARY KEY,
-                title TEXT NOT NULL,
+                title VARCHAR(200) NOT NULL,
                 content TEXT NOT NULL,
                 tags TEXT[] DEFAULT ARRAY[]::TEXT[],
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
+
+            -- Add index for faster tag searches
+            CREATE INDEX IF NOT EXISTS idx_notes_tags ON notes USING GIN (tags);
+
+            -- Add index for timestamp sorting
+            CREATE INDEX IF NOT EXISTS idx_notes_updated_at ON notes (updated_at DESC);
         `;
         return this.run(sql);
     }
