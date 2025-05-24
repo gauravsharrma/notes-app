@@ -38,13 +38,13 @@ async function loadNotes(filterTag = '') {
         }
         
         const data = await response.json();
-        notes = data;
+        notes = Array.isArray(data) ? data : [];  // Ensure notes is always an array
         renderNotes();
     } catch (error) {
         console.error('Error loading notes:', error);
+        notes = [];  // Reset notes to empty array on error
         showError('Failed to load notes: ' + error.message);
-        // Clear notes list if there's an error
-        notesList.innerHTML = '<div class="text-red-500 p-4">Failed to load notes. Please try refreshing the page.</div>';
+        renderNotes();  // Still call renderNotes to show empty state
     } finally {
         hideLoading();
     }
@@ -60,11 +60,13 @@ async function loadTags() {
         }
         
         const data = await response.json();
-        tags = data;
+        tags = Array.isArray(data) ? data : [];  // Ensure tags is always an array
         updateTagFilter();
     } catch (error) {
         console.error('Error loading tags:', error);
+        tags = [];  // Reset tags to empty array on error
         showError('Failed to load tags: ' + error.message);
+        updateTagFilter();  // Still update the filter to show empty state
     }
 }
 
@@ -199,19 +201,30 @@ function createTagElement(tag, isButton = false) {
 function renderNotes() {
     notesList.innerHTML = '';
     
+    // Check if notes is null/undefined or empty
+    if (!notes || !Array.isArray(notes) || notes.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.className = 'text-center p-8 text-gray-500';
+        emptyMessage.textContent = 'No notes found. Create your first note!';
+        notesList.appendChild(emptyMessage);
+        return;
+    }
+    
     notes.forEach(note => {
         const noteElement = noteTemplate.content.cloneNode(true);
         const noteCard = noteElement.querySelector('.note-card');
         
         // Set title and content
-        noteCard.querySelector('h3').textContent = note.title;
-        noteCard.querySelector('p').textContent = note.content;
+        noteCard.querySelector('h3').textContent = note.title || 'Untitled';
+        noteCard.querySelector('p').textContent = note.content || '';
         
         // Add tags
         const tagsContainer = noteCard.querySelector('.tags-container');
-        note.tags.forEach(tag => {
-            tagsContainer.appendChild(createTagElement(tag, true));
-        });
+        if (note.tags && Array.isArray(note.tags)) {
+            note.tags.forEach(tag => {
+                tagsContainer.appendChild(createTagElement(tag, true));
+            });
+        }
         
         // Add timestamps
         const createdAt = noteCard.querySelector('.created-at');
