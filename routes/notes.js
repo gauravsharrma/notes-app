@@ -5,8 +5,21 @@ const notesService = require('../services/notes-service');
 // Get all notes
 router.get('/', async (req, res) => {
     try {
-        const notes = await notesService.getAllNotes();
+        const tag = req.query.tag;
+        const notes = tag 
+            ? await notesService.getNotesByTag(tag)
+            : await notesService.getAllNotes();
         res.json(notes);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get all tags
+router.get('/tags', async (req, res) => {
+    try {
+        const tags = await notesService.getAllTags();
+        res.json(tags);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

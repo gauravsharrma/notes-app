@@ -13,27 +13,73 @@
             <h1 class="text-3xl font-bold text-gray-800">Notes App</h1>
         </header>
 
+        <!-- Tag Filter -->
         <div class="mb-6">
-            <form id="noteForm" class="space-y-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Tag</label>
+            <div class="flex items-center space-x-2">
+                <select id="tagFilter" class="flex-grow p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">All Notes</option>
+                </select>
+                <button id="clearFilter" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">
+                    Clear
+                </button>
+            </div>
+        </div>
+
+        <!-- Note Form -->
+        <div class="mb-6">
+            <form id="noteForm" class="space-y-4 bg-white p-6 rounded-lg shadow-sm">
                 <div>
+                    <label for="noteTitle" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
                     <input type="text" id="noteTitle" placeholder="Note Title" 
                            class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
+                    <label for="noteContent" class="block text-sm font-medium text-gray-700 mb-1">Content</label>
                     <textarea id="noteContent" placeholder="Note Content" rows="4"
                             class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                 </div>
+                <div>
+                    <label for="noteTags" class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+                    <input type="text" id="noteTags" placeholder="Add tags (comma-separated)" 
+                           class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p class="mt-1 text-sm text-gray-500">Separate multiple tags with commas (e.g., work, ideas, todo)</p>
+                </div>
                 <button type="submit" 
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
+                        class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
                     Add Note
                 </button>
             </form>
         </div>
 
+        <!-- Notes List -->
         <div id="notesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- Notes will be dynamically inserted here -->
         </div>
     </div>
+
+    <!-- Note Template -->
+    <template id="noteTemplate">
+        <div class="note-card bg-white p-4 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold mb-2"></h3>
+            <p class="text-gray-600 mb-4"></p>
+            <div class="mb-3 space-x-1 tags-container">
+                <!-- Tags will be inserted here -->
+            </div>
+            <div class="text-sm text-gray-500 mb-4">
+                <p class="created-at"></p>
+                <p class="updated-at"></p>
+            </div>
+            <div class="flex justify-end space-x-2">
+                <button class="edit-btn text-blue-500 hover:text-blue-700">
+                    Edit
+                </button>
+                <button class="delete-btn text-red-500 hover:text-red-700">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </template>
 
     <script src="app.js"></script>
 </body>
