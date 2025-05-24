@@ -7,7 +7,6 @@ class StorageService {
             ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
         });
 
-        // Add error handler for pool
         this.pool.on('error', (err) => {
             console.error('Unexpected error on idle client', err);
         });
@@ -15,16 +14,13 @@ class StorageService {
 
     async connect() {
         try {
-            // Test the connection
             const client = await this.pool.connect();
             console.log('Successfully connected to PostgreSQL');
             client.release();
-            
             await this.initializeDatabase();
-            return Promise.resolve();
         } catch (error) {
             console.error('Database connection error:', error);
-            return Promise.reject(error);
+            throw error;
         }
     }
 
@@ -37,7 +33,7 @@ class StorageService {
                 tags TEXT[] DEFAULT ARRAY[]::TEXT[],
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-            )
+            );
         `;
         return this.run(sql);
     }
@@ -101,7 +97,6 @@ class StorageService {
         return result.rows.map(row => row.tag);
     }
 
-    // Helper method for running queries
     async run(sql, params = []) {
         const result = await this.pool.query(sql, params);
         return { 
@@ -115,4 +110,4 @@ class StorageService {
     }
 }
 
-module.exports = new StorageService(); 
+module.exports = new StorageService();
