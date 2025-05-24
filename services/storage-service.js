@@ -6,13 +6,24 @@ class StorageService {
             connectionString: process.env.DATABASE_URL,
             ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
         });
+
+        // Add error handler for pool
+        this.pool.on('error', (err) => {
+            console.error('Unexpected error on idle client', err);
+        });
     }
 
     async connect() {
         try {
+            // Test the connection
+            const client = await this.pool.connect();
+            console.log('Successfully connected to PostgreSQL');
+            client.release();
+            
             await this.initializeDatabase();
             return Promise.resolve();
         } catch (error) {
+            console.error('Database connection error:', error);
             return Promise.reject(error);
         }
     }
