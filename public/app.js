@@ -1,8 +1,5 @@
 // API endpoints
-const API_URL = window.location.hostname === 'localhost' 
-    ? `${window.location.origin}/api`
-    : `${window.location.origin}/api`;  // For production, ensure your Render service is configured correctly
-
+const API_URL = `${window.location.origin}/api`;
 
 
 // State management
