@@ -8,6 +8,8 @@ router.get('/tags', async (req, res) => {
         const tags = await notesService.getAllTags();
         res.json(tags);
     } catch (error) {
+        console.error('Error in /api/notes route:', error); // Add this
+
         res.status(500).json({ error: error.message });
     }
 });
@@ -21,6 +23,8 @@ router.get('/', async (req, res) => {
             : await notesService.getAllNotes();
         res.json(notes);
     } catch (error) {
+        console.error('Error in /api/notes route:', error); // Add this
+
         res.status(500).json({ error: error.message });
     }
 });
@@ -33,6 +37,8 @@ router.get('/:id', async (req, res) => {
         const note = await notesService.getNoteById(req.params.id);
         res.json(note);
     } catch (error) {
+        console.error('Error in /api/notes route:', error); // Add this
+
         if (error.message.includes('not found')) {
             res.status(404).json({ error: error.message });
         } else {
@@ -47,6 +53,8 @@ router.post('/', async (req, res) => {
         const result = await notesService.createNote(req.body);
         res.status(201).json(result);
     } catch (error) {
+        console.error('Error in /api/notes route:', error); // Add this
+
         if (error.message.includes('required')) {
             res.status(400).json({ error: error.message });
         } else {
@@ -61,6 +69,7 @@ router.put('/:id', async (req, res) => {
         const result = await notesService.updateNote(req.params.id, req.body);
         res.json(result);
     } catch (error) {
+        console.error('Error in /api/notes route:', error); // Add this
         if (error.message.includes('not found')) {
             res.status(404).json({ error: error.message });
         } else if (error.message.includes('required')) {
@@ -77,6 +86,7 @@ router.delete('/:id', async (req, res) => {
         await notesService.deleteNote(req.params.id);
         res.status(204).send();
     } catch (error) {
+        console.error('Error in /api/notes route:', error); // Add this
         if (error.message.includes('not found')) {
             res.status(404).json({ error: error.message });
         } else {
