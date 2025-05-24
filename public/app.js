@@ -32,11 +32,19 @@ async function loadNotes(filterTag = '') {
         showLoading();
         const url = filterTag ? `${API_URL}/notes?tag=${encodeURIComponent(filterTag)}` : `${API_URL}/notes`;
         const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
         notes = data;
         renderNotes();
     } catch (error) {
-        showError('Failed to load notes');
+        console.error('Error loading notes:', error);
+        showError('Failed to load notes: ' + error.message);
+        // Clear notes list if there's an error
+        notesList.innerHTML = '<div class="text-red-500 p-4">Failed to load notes. Please try refreshing the page.</div>';
     } finally {
         hideLoading();
     }
@@ -46,11 +54,17 @@ async function loadNotes(filterTag = '') {
 async function loadTags() {
     try {
         const response = await fetch(`${API_URL}/notes/tags`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
         tags = data;
         updateTagFilter();
     } catch (error) {
-        showError('Failed to load tags');
+        console.error('Error loading tags:', error);
+        showError('Failed to load tags: ' + error.message);
     }
 }
 
@@ -221,7 +235,11 @@ function resetForm() {
 }
 
 function showLoading() {
-    notesList.innerHTML = '<div class="loading text-center">Loading...</div>';
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'loading text-center p-4 text-gray-600';
+    loadingDiv.textContent = 'Loading...';
+    notesList.innerHTML = '';
+    notesList.appendChild(loadingDiv);
 }
 
 function hideLoading() {
@@ -230,11 +248,23 @@ function hideLoading() {
 }
 
 function showError(message) {
+    console.error(message); // Log error to console
     const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-message bg-red-100 text-red-700 p-2 rounded mb-4';
+    errorDiv.className = 'error-message bg-red-100 text-red-700 p-4 rounded mb-4';
     errorDiv.textContent = message;
+    
+    // Remove any existing error messages
+    const existingError = document.querySelector('.error-message');
+    if (existingError) {
+        existingError.remove();
+    }
+    
     noteForm.insertAdjacentElement('beforebegin', errorDiv);
-    setTimeout(() => errorDiv.remove(), 3000);
+    setTimeout(() => {
+        if (errorDiv.parentNode) {
+            errorDiv.remove();
+        }
+    }, 5000);
 }
 
 function escapeHtml(unsafe) {

@@ -7,12 +7,11 @@
 }
 
 .delete-btn {
-    opacity: 0;
-    transition: opacity 0.2s ease-in-out;
+    transition: color 0.2s ease-in-out;
 }
 
 .note-card:hover .delete-btn {
-    opacity: 1;
+    color: #ef4444;
 }
 
 .loading {
